@@ -24,6 +24,8 @@ There is an example of d3 tree in v3 with pannable tree, something that seems to
 
 Maybe follow <https://theproductiveengineer.net/how-to-setup-vs-code-for-javascript/>?
 
+Also, what the hell is transpiling? <https://stackoverflow.com/questions/59317194/how-to-use-npm-package-as-normal-javascript-in-html>
+
 ## Including js libraries locally
 
 Just inlude path <https://stackoverflow.com/questions/38638828/how-do-i-import-the-d3-library-into-my-project-file-structure>

@@ -149,10 +149,21 @@ function showTree() {
           .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
       // Enter any new nodes at the parent's previous position.
+      var timeout = null;
+      var double_click_timeout=150
       var nodeEnter = node.enter().append("g")
           .attr("class", "node")
           .attr("transform", function(d) { return "translate(" + source.x0 + "," + source.y0 + ")"; })
           .on("click", click)
+          .on("click", function(d){
+            clearTimeout(timeout);
+            timeout = setTimeout(function(d) {
+                click(d);}, double_click_timeout, d)
+          })
+          .on("dblclick", function(d){
+            clearTimeout(timeout);
+            dblclick(d);
+          })
 
       // Enter the selected shape
       nodeEnter.each(function(d){
@@ -261,6 +272,24 @@ function showTree() {
         update(d, 750);
     }
 
+    async function display_nested_children(d, display_depth){
+        let depth = 1;
+        let expanding=null;
+        let to_expand=[d];
+        while(depth<=display_depth){
+            expanding=to_expand;
+            to_expand=[];
+            while(expanding.length>0){
+                let n = expanding.pop();
+                await display_children(n)
+                if(n.children && n.children.length>0){
+                    to_expand.push(...n.children);
+                }
+            }
+            depth++;
+        }
+    }
+
     async function display_children(d){
         if (d._children) {
             d.children = d._children;
@@ -281,21 +310,23 @@ function showTree() {
         if (d.children) {
             hide_children(d)
         } else {
-            let depth = 1;
-            let expanding=null;
-            let to_expand=[d];
-            while(depth<=on_click_display_depth){
-                expanding=to_expand;
-                to_expand=[];
-                // console.log([depth, expanding.length])
-                while(expanding.length>0){
-                    let n = expanding.pop();
-                    await display_children(n)
-                    if(n.children && n.children.length>0){
-                        to_expand.push(...n.children);
-                    }
-                }
-                depth++;
+            if(on_click_display_depth==1){
+                display_children(d)
+            } else{
+                await display_nested_children(d, on_click_display_depth)
+            }    
+        }
+    }
+
+    async function dblclick(d){
+        console.log("double click")
+        if (d.children) {
+            hide_children(d)
+        } else {
+            if(on_click_display_depth==1){
+                await display_nested_children(d, 2)
+            } else{
+                display_children(d)
             }
         }
     }
